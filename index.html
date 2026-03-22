@@ -1,0 +1,614 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="Priorit">
+<meta name="theme-color" content="#0e0e0f">
+<title>Priorit</title>
+<link rel="manifest" href="manifest.json">
+<link rel="icon" href="icons/icon-192.png">
+<link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --bg: #0e0e0f;
+    --surface: #161618;
+    --border: #2a2a2e;
+    --text: #f0ede8;
+    --muted: #6b6870;
+    --accent: #e8d5a3;
+    --q1: #ff6b6b;
+    --q2: #f4a261;
+    --q3: #ffd166;
+    --q4: #6bcb77;
+    --safe-top: env(safe-area-inset-top, 0px);
+    --safe-bottom: env(safe-area-inset-bottom, 0px);
+  }
+
+  html, body {
+    height: 100%;
+    overscroll-behavior: none;
+  }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    display: flex;
+    flex-direction: column;
+    padding-top: var(--safe-top);
+    padding-bottom: var(--safe-bottom);
+  }
+
+  /* Grain */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.35;
+  }
+
+  /* ── HEADER ── */
+  .header {
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 20px 12px;
+    display: flex;
+    align-items: baseline;
+    gap: 12px;
+  }
+
+  .logo {
+    font-family: 'Instrument Serif', serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+    letter-spacing: -0.02em;
+    line-height: 1;
+  }
+
+  .tagline {
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+  }
+
+  /* ── MAIN SCROLL AREA ── */
+  .main {
+    flex: 1;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    padding: 20px 16px 120px;
+    position: relative;
+    z-index: 1;
+  }
+
+  /* ── INSTALL BANNER ── */
+  .install-banner {
+    background: rgba(232, 213, 163, 0.08);
+    border: 1px solid rgba(232, 213, 163, 0.2);
+    border-radius: 2px;
+    padding: 12px 14px;
+    margin-bottom: 20px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .install-banner p {
+    font-size: 0.68rem;
+    color: var(--accent);
+    line-height: 1.5;
+  }
+
+  .btn-install {
+    background: var(--accent);
+    color: #0e0e0f;
+    border: none;
+    padding: 7px 14px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.62rem;
+    font-weight: 500;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 1px;
+    white-space: nowrap;
+  }
+
+  .btn-dismiss {
+    background: none;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    font-size: 1rem;
+    padding: 0 4px;
+    flex-shrink: 0;
+  }
+
+  /* ── STATUS ── */
+  .status {
+    font-size: 0.65rem;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    min-height: 18px;
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    margin-bottom: 16px;
+  }
+
+  .status.loading { color: var(--accent); }
+  .status.error   { color: var(--q1); }
+
+  .dot {
+    width: 5px; height: 5px;
+    border-radius: 50%;
+    background: currentColor;
+    animation: pulse 1s infinite;
+    flex-shrink: 0;
+  }
+
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* ── RESULTS ── */
+  .results { display: flex; flex-direction: column; gap: 10px; }
+
+  .quadrant-block {
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  @keyframes fadeUp {
+    from { opacity:0; transform:translateY(10px) }
+    to   { opacity:1; transform:translateY(0) }
+  }
+
+  .quadrant-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 14px;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+  }
+
+  .q-badge {
+    font-size: 0.58rem;
+    font-weight: 500;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 3px 7px;
+    border-radius: 1px;
+    color: #0e0e0f;
+  }
+  .q1 .q-badge { background: var(--q1); }
+  .q2 .q-badge { background: var(--q2); }
+  .q3 .q-badge { background: var(--q3); }
+  .q4 .q-badge { background: var(--q4); }
+
+  .q-title { font-size: 0.66rem; color: var(--muted); }
+
+  .task-item {
+    padding: 12px 14px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+  }
+  .task-item:last-child { border-bottom: none; }
+
+  .task-info { flex: 1; min-width: 0; }
+
+  .task-name {
+    font-size: 0.84rem;
+    line-height: 1.4;
+    margin-bottom: 5px;
+    word-break: break-word;
+  }
+
+  .task-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 5px;
+  }
+
+  .meta-pill {
+    font-size: 0.56rem;
+    letter-spacing: 0.07em;
+    text-transform: uppercase;
+    color: var(--muted);
+    background: rgba(255,255,255,0.04);
+    padding: 2px 6px;
+    border-radius: 1px;
+  }
+
+  .task-right {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 5px;
+    flex-shrink: 0;
+  }
+
+  .task-date {
+    font-size: 0.6rem;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .btn-cal {
+    background: transparent;
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 5px 10px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.58rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 1px;
+    white-space: nowrap;
+    transition: all 0.15s;
+    min-width: 72px;
+    text-align: center;
+  }
+  .btn-cal:hover  { border-color: var(--accent); color: var(--accent); }
+  .btn-cal.added  { border-color: var(--q4); color: var(--q4); }
+  .btn-cal:disabled { opacity: 0.35; }
+
+  .add-all-row {
+    display: flex;
+    justify-content: flex-end;
+    margin-top: 10px;
+    margin-bottom: 4px;
+  }
+
+  .btn-add-all {
+    background: transparent;
+    border: 1px solid var(--accent);
+    color: var(--accent);
+    padding: 10px 18px;
+    font-family: 'DM Mono', monospace;
+    font-size: 0.65rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    cursor: pointer;
+    border-radius: 1px;
+    transition: all 0.15s;
+  }
+  .btn-add-all:hover  { background: var(--accent); color: #0e0e0f; }
+  .btn-add-all:disabled { opacity: 0.35; cursor: not-allowed; }
+
+  /* ── BOTTOM INPUT BAR ── */
+  .input-bar {
+    position: fixed;
+    bottom: 0;
+    left: 0; right: 0;
+    z-index: 20;
+    background: var(--surface);
+    border-top: 1px solid var(--border);
+    padding: 12px 16px calc(12px + var(--safe-bottom));
+  }
+
+  .input-hint {
+    font-size: 0.58rem;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+
+  .input-row {
+    display: flex;
+    gap: 10px;
+    align-items: flex-end;
+  }
+
+  textarea {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 2px;
+    outline: none;
+    color: var(--text);
+    font-family: 'DM Mono', monospace;
+    font-size: 0.88rem;
+    line-height: 1.55;
+    padding: 10px 12px;
+    resize: none;
+    min-height: 44px;
+    max-height: 140px;
+    caret-color: var(--accent);
+    transition: border-color 0.15s;
+  }
+  textarea:focus { border-color: rgba(232,213,163,0.4); }
+  textarea::placeholder { color: var(--muted); opacity: 0.5; }
+
+  .btn-send {
+    background: var(--accent);
+    color: #0e0e0f;
+    border: none;
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    font-size: 1.2rem;
+    cursor: pointer;
+    border-radius: 2px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: opacity 0.15s;
+  }
+  .btn-send:hover   { opacity: 0.85; }
+  .btn-send:disabled { opacity: 0.35; cursor: not-allowed; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="logo">Priorit</div>
+  <div class="tagline">Eisenhower · Agenda</div>
+</div>
+
+<div class="main" id="main">
+  <div class="install-banner" id="installBanner" style="display:none">
+    <p>Installez l'app sur votre bureau Android</p>
+    <button class="btn-install" id="installBtn">Installer</button>
+    <button class="btn-dismiss" onclick="document.getElementById('installBanner').style.display='none'">✕</button>
+  </div>
+
+  <div class="status" id="status">Saisissez vos tâches ci-dessous</div>
+  <div id="results"></div>
+</div>
+
+<div class="input-bar">
+  <div class="input-hint">Saisie libre de tâches</div>
+  <div class="input-row">
+    <textarea
+      id="taskInput"
+      placeholder="Ex : RDV dentiste urgent, payer loyer avant vendredi, idée voyage Japon..."
+      rows="2"
+    ></textarea>
+    <button class="btn-send" id="sendBtn" onclick="analyze()">→</button>
+  </div>
+</div>
+
+<script>
+// ── PWA Install prompt ──
+let deferredPrompt = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  deferredPrompt = e;
+  document.getElementById('installBanner').style.display = 'flex';
+});
+
+document.getElementById('installBtn').addEventListener('click', async () => {
+  if (!deferredPrompt) return;
+  deferredPrompt.prompt();
+  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt = null;
+  document.getElementById('installBanner').style.display = 'none';
+});
+
+window.addEventListener('appinstalled', () => {
+  document.getElementById('installBanner').style.display = 'none';
+});
+
+// ── Service Worker ──
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./sw.js').catch(() => {});
+}
+
+// ── Auto-resize textarea ──
+const textarea = document.getElementById('taskInput');
+textarea.addEventListener('input', () => {
+  textarea.style.height = 'auto';
+  textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
+});
+
+// ── Helpers ──
+const statusEl = document.getElementById('status');
+const resultsEl = document.getElementById('results');
+
+function setStatus(msg, type = '') {
+  statusEl.className = 'status ' + type;
+  statusEl.innerHTML = type === 'loading'
+    ? `<span class="dot"></span>${msg}`
+    : msg;
+}
+
+// ── System prompt ──
+const SYSTEM_PROMPT = `Tu es un assistant d'organisation personnel. Tu analyses du texte libre en français et extrais des tâches que tu classes selon la matrice d'Eisenhower.
+
+Règles de classification :
+- Q1 (Urgent + Important) : à faire immédiatement
+- Q2 (Important, pas urgent) : à planifier
+- Q3 (Urgent, pas important) : à traiter vite ou déléguer
+- Q4 (Ni urgent ni important) : à faire quand possible
+
+Ordre d'importance des catégories :
+1. Finances / administratif
+2. Famille / proches
+3. Santé / RDV médicaux
+4. Projets personnels
+5. Loisirs / voyages
+6. Courses / quotidien
+
+L'urgence est déterminée par le contexte (mots comme "urgent", "demain", "avant vendredi", délais implicites, etc.).
+
+Réponds UNIQUEMENT en JSON valide, sans markdown, sans explication :
+{
+  "tasks": [
+    {
+      "name": "Nom court de la tâche",
+      "category": "une des 6 catégories",
+      "quadrant": "Q1"|"Q2"|"Q3"|"Q4",
+      "date": "Date suggérée en français (Aujourd'hui, Demain, Cette semaine, Ce mois-ci, À planifier)",
+      "duration": "Durée estimée (15 min, 1h, 2h...)",
+      "reason": "Justification courte (max 6 mots)"
+    }
+  ]
+}`;
+
+// ── Analyze ──
+async function analyze() {
+  const text = textarea.value.trim();
+  if (!text) return;
+
+  const btn = document.getElementById('sendBtn');
+  btn.disabled = true;
+  setStatus('Analyse en cours...', 'loading');
+
+  try {
+    const response = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        system: SYSTEM_PROMPT,
+        messages: [{ role: 'user', content: text }]
+      })
+    });
+
+    const data = await response.json();
+    const raw = data.content?.[0]?.text || '';
+    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
+    const tasks = parsed.tasks || [];
+
+    renderResults(tasks);
+    setStatus(`${tasks.length} tâche${tasks.length > 1 ? 's' : ''} classée${tasks.length > 1 ? 's' : ''}`);
+    textarea.value = '';
+    textarea.style.height = 'auto';
+
+    // Scroll to results
+    setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth' }), 100);
+  } catch (e) {
+    setStatus('Erreur lors de l\'analyse. Réessayez.', 'error');
+  } finally {
+    btn.disabled = false;
+  }
+}
+
+// ── Render ──
+function renderResults(tasks) {
+  const quadrants = {
+    Q1: { desc: 'Urgent · Important',       tasks: [] },
+    Q2: { desc: 'Important · À planifier',  tasks: [] },
+    Q3: { desc: 'Urgent · Moins important', tasks: [] },
+    Q4: { desc: 'À faire plus tard',        tasks: [] }
+  };
+  tasks.forEach(t => { if (quadrants[t.quadrant]) quadrants[t.quadrant].tasks.push(t); });
+
+  let html = '<div class="results">';
+  Object.entries(quadrants).forEach(([key, q], qi) => {
+    if (!q.tasks.length) return;
+    html += `
+      <div class="quadrant-block ${key.toLowerCase()}" style="animation-delay:${qi*0.07}s">
+        <div class="quadrant-header">
+          <span class="q-badge">${key}</span>
+          <span class="q-title">${q.desc}</span>
+        </div>`;
+    q.tasks.forEach((task, i) => {
+      const id = `t-${key}-${i}`;
+      const taskJson = JSON.stringify(task).replace(/"/g, '&quot;');
+      html += `
+        <div class="task-item">
+          <div class="task-info">
+            <div class="task-name">${task.name}</div>
+            <div class="task-meta">
+              <span class="meta-pill">${task.category}</span>
+              <span class="meta-pill">${task.duration || '?'}</span>
+              <span class="meta-pill">${task.reason}</span>
+            </div>
+          </div>
+          <div class="task-right">
+            <div class="task-date">${task.date}</div>
+            <button class="btn-cal" id="${id}" onclick="addToCalendar(this, ${taskJson})">+ Agenda</button>
+          </div>
+        </div>`;
+    });
+    html += `</div>`;
+  });
+  html += '</div>';
+  html += `
+    <div class="add-all-row">
+      <button class="btn-add-all" onclick="addAllToCalendar(${JSON.stringify(tasks).replace(/"/g, '&quot;')})">
+        Tout ajouter →
+      </button>
+    </div>`;
+
+  resultsEl.innerHTML = html;
+}
+
+// ── Add to Calendar ──
+async function addToCalendar(btn, task) {
+  btn.disabled = true;
+  btn.textContent = '...';
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        mcp_servers: [{ type: 'url', url: 'https://gcal.mcp.claude.com/mcp', name: 'gcal' }],
+        system: `Tu es un assistant qui crée des événements Google Calendar. Aujourd'hui : ${new Date().toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric'})}. Crée l'événement avec une date et heure réalistes selon la priorité.`,
+        messages: [{
+          role: 'user',
+          content: `Crée un événement Google Calendar :
+Nom : ${task.name}
+Catégorie : ${task.category}
+Priorité : ${task.quadrant}
+Date suggérée : ${task.date}
+Durée : ${task.duration}`
+        }]
+      })
+    });
+    const data = await res.json();
+    const ok = data.content?.some(b => b.type === 'mcp_tool_result' || (b.type === 'text' && b.text.length > 0));
+    if (ok) { btn.textContent = '✓ Ajouté'; btn.classList.add('added'); }
+    else throw new Error();
+  } catch {
+    btn.textContent = 'Erreur';
+    btn.disabled = false;
+  }
+}
+
+async function addAllToCalendar(tasks) {
+  const btn = document.querySelector('.btn-add-all');
+  btn.disabled = true;
+  btn.textContent = 'Ajout...';
+  for (let i = 0; i < tasks.length; i++) {
+    const t = tasks[i];
+    const idx = (() => {
+      let c = 0;
+      for (let j = 0; j < i; j++) if (tasks[j].quadrant === t.quadrant) c++;
+      return c;
+    })();
+    const b = document.getElementById(`t-${t.quadrant}-${idx}`);
+    if (b && !b.classList.contains('added')) {
+      await addToCalendar(b, t);
+      await new Promise(r => setTimeout(r, 500));
+    }
+  }
+  btn.textContent = '✓ Tous ajoutés';
+}
+</script>
+</body>
+</html>
