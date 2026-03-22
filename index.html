@@ -451,6 +451,8 @@ Ordre d'importance des catégories :
 
 L'urgence est déterminée par le contexte (mots comme "urgent", "demain", "avant vendredi", délais implicites, etc.).
 
+Tu reçois aussi les événements déjà présents dans Google Calendar pour les 7 prochains jours. Tu dois proposer des créneaux horaires qui ne sont PAS déjà occupés. Si un créneau est pris, décale la tâche au prochain créneau libre.
+
 Réponds UNIQUEMENT en JSON valide, sans markdown, sans explication :
 {
   "tasks": [
@@ -458,12 +460,54 @@ Réponds UNIQUEMENT en JSON valide, sans markdown, sans explication :
       "name": "Nom court de la tâche",
       "category": "une des 6 catégories",
       "quadrant": "Q1"|"Q2"|"Q3"|"Q4",
-      "date": "Date suggérée en français (Aujourd'hui, Demain, Cette semaine, Ce mois-ci, À planifier)",
+      "date": "Date ET heure précises suggérées (ex: Lundi 24 mars à 10h00)",
       "duration": "Durée estimée (15 min, 1h, 2h...)",
-      "reason": "Justification courte (max 6 mots)"
+      "reason": "Justification courte (max 6 mots)",
+      "conflict": false
     }
   ]
 }`;
+
+// ── Fetch existing Google Calendar events ──
+async function fetchCalendarEvents() {
+  const today = new Date();
+  const in7days = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
+  const fmt = d => d.toISOString();
+
+  try {
+    const res = await fetch('https://api.anthropic.com/v1/messages', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        model: 'claude-sonnet-4-20250514',
+        max_tokens: 1000,
+        mcp_servers: [{ type: 'url', url: 'https://gcal.mcp.claude.com/mcp', name: 'gcal' }],
+        system: `Tu es un assistant qui lit Google Calendar. Réponds UNIQUEMENT en JSON valide sans markdown.`,
+        messages: [{
+          role: 'user',
+          content: `Liste tous mes événements Google Calendar entre le ${fmt(today)} et le ${fmt(in7days)}. 
+Réponds en JSON uniquement :
+{"events": [{"title": "...", "start": "...", "end": "...", "date": "..."}]}`
+        }]
+      })
+    });
+
+    const data = await res.json();
+    // Extract text from all text blocks
+    const textBlocks = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
+    const toolResults = data.content?.filter(b => b.type === 'mcp_tool_result').map(b => b.content?.[0]?.text || '').join('\n');
+    const raw = (textBlocks + toolResults).replace(/```json|```/g, '').trim();
+
+    try {
+      const parsed = JSON.parse(raw);
+      return parsed.events || [];
+    } catch {
+      return [];
+    }
+  } catch {
+    return [];
+  }
+}
 
 // ── Analyze ──
 async function analyze() {
@@ -472,17 +516,28 @@ async function analyze() {
 
   const btn = document.getElementById('sendBtn');
   btn.disabled = true;
-  setStatus('Analyse en cours...', 'loading');
+
+  // Step 1: fetch calendar
+  setStatus('Lecture de votre agenda...', 'loading');
+  const existingEvents = await fetchCalendarEvents();
+
+  // Step 2: analyze tasks with calendar context
+  setStatus('Analyse et planification...', 'loading');
+
+  const calendarContext = existingEvents.length > 0
+    ? `\n\nÉvénements déjà dans ton agenda les 7 prochains jours :\n${existingEvents.map(e => `- ${e.title} : ${e.date || ''} ${e.start || ''} → ${e.end || ''}`).join('\n')}`
+    : '\n\nAgenda vide pour les 7 prochains jours.';
 
   try {
+    const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
     const response = await fetch('https://api.anthropic.com/v1/messages', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1000,
-        system: SYSTEM_PROMPT,
-        messages: [{ role: 'user', content: text }]
+        system: SYSTEM_PROMPT + `\n\nAujourd'hui : ${today}`,
+        messages: [{ role: 'user', content: text + calendarContext }]
       })
     });
 
@@ -491,12 +546,11 @@ async function analyze() {
     const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
     const tasks = parsed.tasks || [];
 
-    renderResults(tasks);
-    setStatus(`${tasks.length} tâche${tasks.length > 1 ? 's' : ''} classée${tasks.length > 1 ? 's' : ''}`);
+    renderResults(tasks, existingEvents.length);
+    setStatus(`${tasks.length} tâche${tasks.length > 1 ? 's' : ''} planifiée${tasks.length > 1 ? 's' : ''} · ${existingEvents.length} événement${existingEvents.length > 1 ? 's' : ''} existant${existingEvents.length > 1 ? 's' : ''} pris en compte`);
     textarea.value = '';
     textarea.style.height = 'auto';
 
-    // Scroll to results
     setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth' }), 100);
   } catch (e) {
     setStatus('Erreur lors de l\'analyse. Réessayez.', 'error');
@@ -506,7 +560,7 @@ async function analyze() {
 }
 
 // ── Render ──
-function renderResults(tasks) {
+function renderResults(tasks, calCount = 0) {
   const quadrants = {
     Q1: { desc: 'Urgent · Important',       tasks: [] },
     Q2: { desc: 'Important · À planifier',  tasks: [] },
