@@ -14,355 +14,143 @@
 <link href="https://fonts.googleapis.com/css2?family=Instrument+Serif:ital@0;1&family=DM+Mono:wght@300;400;500&display=swap" rel="stylesheet">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-
   :root {
-    --bg: #0e0e0f;
-    --surface: #161618;
-    --border: #2a2a2e;
-    --text: #f0ede8;
-    --muted: #6b6870;
-    --accent: #e8d5a3;
-    --q1: #ff6b6b;
-    --q2: #f4a261;
-    --q3: #ffd166;
-    --q4: #6bcb77;
+    --bg: #0e0e0f; --surface: #161618; --border: #2a2a2e;
+    --text: #f0ede8; --muted: #6b6870; --accent: #e8d5a3;
+    --q1: #ff6b6b; --q2: #f4a261; --q3: #ffd166; --q4: #6bcb77;
     --safe-top: env(safe-area-inset-top, 0px);
     --safe-bottom: env(safe-area-inset-bottom, 0px);
   }
-
-  html, body {
-    height: 100%;
-    overscroll-behavior: none;
-  }
-
+  html, body { height: 100%; overscroll-behavior: none; }
   body {
-    background: var(--bg);
-    color: var(--text);
+    background: var(--bg); color: var(--text);
     font-family: 'DM Mono', monospace;
-    display: flex;
-    flex-direction: column;
+    display: flex; flex-direction: column;
     padding-top: var(--safe-top);
-    padding-bottom: var(--safe-bottom);
   }
-
-  /* Grain */
   body::before {
-    content: '';
-    position: fixed;
-    inset: 0;
+    content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0; opacity: 0.35;
     background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-    pointer-events: none;
-    z-index: 0;
-    opacity: 0.35;
   }
 
-  /* ── HEADER ── */
+  /* HEADER */
   .header {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--bg);
-    border-bottom: 1px solid var(--border);
-    padding: 16px 20px 12px;
-    display: flex;
-    align-items: baseline;
-    gap: 12px;
+    position: sticky; top: 0; z-index: 10; background: var(--bg);
+    border-bottom: 1px solid var(--border); padding: 14px 20px 10px;
+    display: flex; align-items: baseline; justify-content: space-between;
   }
-
-  .logo {
-    font-family: 'Instrument Serif', serif;
-    font-size: 1.8rem;
-    color: var(--accent);
-    letter-spacing: -0.02em;
-    line-height: 1;
+  .header-left { display: flex; align-items: baseline; gap: 12px; }
+  .logo { font-family: 'Instrument Serif', serif; font-size: 1.8rem; color: var(--accent); letter-spacing: -0.02em; line-height: 1; }
+  .tagline { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; }
+  .btn-clear {
+    font-family: 'DM Mono', monospace; font-size: 0.58rem; letter-spacing: 0.1em;
+    text-transform: uppercase; color: var(--muted); background: none; border: none; cursor: pointer;
+    padding: 4px 8px; opacity: 0; transition: opacity 0.2s;
   }
+  .btn-clear.visible { opacity: 1; }
 
-  .tagline {
-    font-size: 0.58rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-  }
+  /* MAIN */
+  .main { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; padding: 16px 16px 200px; position: relative; z-index: 1; }
 
-  /* ── MAIN SCROLL AREA ── */
-  .main {
-    flex: 1;
-    overflow-y: auto;
-    -webkit-overflow-scrolling: touch;
-    padding: 20px 16px 120px;
-    position: relative;
-    z-index: 1;
-  }
-
-  /* ── INSTALL BANNER ── */
+  /* INSTALL BANNER */
   .install-banner {
-    background: rgba(232, 213, 163, 0.08);
-    border: 1px solid rgba(232, 213, 163, 0.2);
-    border-radius: 2px;
-    padding: 12px 14px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: 12px;
+    background: rgba(232,213,163,0.08); border: 1px solid rgba(232,213,163,0.2);
+    border-radius: 2px; padding: 12px 14px; margin-bottom: 16px;
+    display: flex; justify-content: space-between; align-items: center; gap: 12px;
   }
-
-  .install-banner p {
-    font-size: 0.68rem;
-    color: var(--accent);
-    line-height: 1.5;
-  }
-
+  .install-banner p { font-size: 0.68rem; color: var(--accent); line-height: 1.5; }
   .btn-install {
-    background: var(--accent);
-    color: #0e0e0f;
-    border: none;
-    padding: 7px 14px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.62rem;
-    font-weight: 500;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 1px;
-    white-space: nowrap;
+    background: var(--accent); color: #0e0e0f; border: none; padding: 7px 14px;
+    font-family: 'DM Mono', monospace; font-size: 0.62rem; font-weight: 500;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 1px; white-space: nowrap;
   }
+  .btn-dismiss { background: none; border: none; color: var(--muted); cursor: pointer; font-size: 1rem; padding: 0 4px; }
 
-  .btn-dismiss {
-    background: none;
-    border: none;
-    color: var(--muted);
-    cursor: pointer;
-    font-size: 1rem;
-    padding: 0 4px;
-    flex-shrink: 0;
-  }
+  /* PROGRESS */
+  .progress-wrap { margin-bottom: 16px; display: none; }
+  .progress-wrap.visible { display: block; }
+  .progress-header { display: flex; justify-content: space-between; margin-bottom: 6px; }
+  .progress-label { font-size: 0.62rem; color: var(--accent); letter-spacing: 0.08em; }
+  .progress-pct { font-size: 0.62rem; color: var(--muted); }
+  .progress-bar { height: 2px; background: var(--border); border-radius: 1px; overflow: hidden; }
+  .progress-fill { height: 100%; background: var(--accent); border-radius: 1px; transition: width 0.4s ease; width: 0%; }
 
-  /* ── STATUS ── */
-  .status {
-    font-size: 0.65rem;
-    color: var(--muted);
-    letter-spacing: 0.08em;
-    min-height: 18px;
-    display: flex;
-    align-items: center;
-    gap: 7px;
-    margin-bottom: 16px;
-  }
-
+  /* STATUS */
+  .status { font-size: 0.65rem; color: var(--muted); letter-spacing: 0.08em; min-height: 18px; display: flex; align-items: center; gap: 7px; margin-bottom: 16px; }
   .status.loading { color: var(--accent); }
-  .status.error   { color: var(--q1); }
-
-  .dot {
-    width: 5px; height: 5px;
-    border-radius: 50%;
-    background: currentColor;
-    animation: pulse 1s infinite;
-    flex-shrink: 0;
-  }
-
+  .status.error { color: var(--q1); }
+  .dot { width: 5px; height: 5px; border-radius: 50%; background: currentColor; animation: pulse 1s infinite; flex-shrink: 0; }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
 
-  /* ── RESULTS ── */
+  /* RESULTS */
   .results { display: flex; flex-direction: column; gap: 10px; }
-
-  .quadrant-block {
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    overflow: hidden;
-    animation: fadeUp 0.35s ease both;
-  }
-
-  @keyframes fadeUp {
-    from { opacity:0; transform:translateY(10px) }
-    to   { opacity:1; transform:translateY(0) }
-  }
-
-  .quadrant-header {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    padding: 10px 14px;
-    background: var(--surface);
-    border-bottom: 1px solid var(--border);
-  }
-
-  .q-badge {
-    font-size: 0.58rem;
-    font-weight: 500;
-    letter-spacing: 0.12em;
-    text-transform: uppercase;
-    padding: 3px 7px;
-    border-radius: 1px;
-    color: #0e0e0f;
-  }
-  .q1 .q-badge { background: var(--q1); }
-  .q2 .q-badge { background: var(--q2); }
-  .q3 .q-badge { background: var(--q3); }
-  .q4 .q-badge { background: var(--q4); }
-
-  .q-title { font-size: 0.66rem; color: var(--muted); }
-
-  .task-item {
-    padding: 12px 14px;
-    border-bottom: 1px solid var(--border);
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-  }
+  .quadrant-block { border: 1px solid var(--border); border-radius: 2px; overflow: hidden; animation: fadeUp 0.35s ease both; }
+  @keyframes fadeUp { from{opacity:0;transform:translateY(10px)} to{opacity:1;transform:translateY(0)} }
+  .quadrant-header { display: flex; align-items: center; gap: 10px; padding: 10px 14px; background: var(--surface); border-bottom: 1px solid var(--border); }
+  .q-badge { font-size: 0.58rem; font-weight: 500; letter-spacing: 0.12em; text-transform: uppercase; padding: 3px 7px; border-radius: 1px; color: #0e0e0f; }
+  .q1 .q-badge { background: var(--q1); } .q2 .q-badge { background: var(--q2); }
+  .q3 .q-badge { background: var(--q3); } .q4 .q-badge { background: var(--q4); }
+  .q-title { font-size: 0.66rem; color: var(--muted); flex: 1; }
+  .q-count { font-size: 0.6rem; color: var(--muted); }
+  .task-item { padding: 12px 14px; border-bottom: 1px solid var(--border); display: flex; align-items: flex-start; gap: 12px; }
   .task-item:last-child { border-bottom: none; }
-
   .task-info { flex: 1; min-width: 0; }
-
-  .task-name {
-    font-size: 0.84rem;
-    line-height: 1.4;
-    margin-bottom: 5px;
-    word-break: break-word;
-  }
-
-  .task-meta {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 5px;
-  }
-
-  .meta-pill {
-    font-size: 0.56rem;
-    letter-spacing: 0.07em;
-    text-transform: uppercase;
-    color: var(--muted);
-    background: rgba(255,255,255,0.04);
-    padding: 2px 6px;
-    border-radius: 1px;
-  }
-
-  .task-right {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    gap: 5px;
-    flex-shrink: 0;
-  }
-
-  .task-date {
-    font-size: 0.6rem;
-    color: var(--muted);
-    white-space: nowrap;
-  }
-
+  .task-name { font-size: 0.84rem; line-height: 1.4; margin-bottom: 5px; word-break: break-word; }
+  .task-meta { display: flex; flex-wrap: wrap; gap: 5px; }
+  .meta-pill { font-size: 0.56rem; letter-spacing: 0.07em; text-transform: uppercase; color: var(--muted); background: rgba(255,255,255,0.04); padding: 2px 6px; border-radius: 1px; }
+  .task-right { display: flex; flex-direction: column; align-items: flex-end; gap: 5px; flex-shrink: 0; }
+  .task-date { font-size: 0.6rem; color: var(--muted); white-space: nowrap; }
   .btn-cal {
-    background: transparent;
-    border: 1px solid var(--border);
-    color: var(--muted);
-    padding: 5px 10px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.58rem;
-    letter-spacing: 0.08em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 1px;
-    white-space: nowrap;
-    transition: all 0.15s;
-    min-width: 72px;
-    text-align: center;
+    background: transparent; border: 1px solid var(--border); color: var(--muted);
+    padding: 5px 10px; font-family: 'DM Mono', monospace; font-size: 0.58rem;
+    letter-spacing: 0.08em; text-transform: uppercase; cursor: pointer; border-radius: 1px;
+    white-space: nowrap; transition: all 0.15s; min-width: 72px; text-align: center;
   }
-  .btn-cal:hover  { border-color: var(--accent); color: var(--accent); }
-  .btn-cal.added  { border-color: var(--q4); color: var(--q4); }
+  .btn-cal:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-cal.added { border-color: var(--q4); color: var(--q4); cursor: default; }
   .btn-cal:disabled { opacity: 0.35; }
-
-  .add-all-row {
-    display: flex;
-    justify-content: flex-end;
-    margin-top: 10px;
-    margin-bottom: 4px;
-  }
-
+  .add-all-row { display: flex; justify-content: flex-end; margin-top: 10px; }
   .btn-add-all {
-    background: transparent;
-    border: 1px solid var(--accent);
-    color: var(--accent);
-    padding: 10px 18px;
-    font-family: 'DM Mono', monospace;
-    font-size: 0.65rem;
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    cursor: pointer;
-    border-radius: 1px;
-    transition: all 0.15s;
+    background: transparent; border: 1px solid var(--accent); color: var(--accent);
+    padding: 10px 18px; font-family: 'DM Mono', monospace; font-size: 0.65rem;
+    letter-spacing: 0.1em; text-transform: uppercase; cursor: pointer; border-radius: 1px; transition: all 0.15s;
   }
-  .btn-add-all:hover  { background: var(--accent); color: #0e0e0f; }
+  .btn-add-all:hover { background: var(--accent); color: #0e0e0f; }
   .btn-add-all:disabled { opacity: 0.35; cursor: not-allowed; }
 
-  /* ── BOTTOM INPUT BAR ── */
+  /* INPUT BAR */
   .input-bar {
-    position: fixed;
-    bottom: 0;
-    left: 0; right: 0;
-    z-index: 20;
-    background: var(--surface);
-    border-top: 1px solid var(--border);
+    position: fixed; bottom: 0; left: 0; right: 0; z-index: 20;
+    background: var(--surface); border-top: 1px solid var(--border);
     padding: 12px 16px calc(12px + var(--safe-bottom));
   }
-
-  .input-hint {
-    font-size: 0.58rem;
-    color: var(--muted);
-    letter-spacing: 0.1em;
-    text-transform: uppercase;
-    margin-bottom: 8px;
-  }
-
-  .input-row {
-    display: flex;
-    gap: 10px;
-    align-items: flex-end;
-  }
-
+  .input-hint { font-size: 0.58rem; color: var(--muted); letter-spacing: 0.1em; text-transform: uppercase; margin-bottom: 6px; }
+  .input-row { display: flex; gap: 10px; align-items: flex-end; }
   textarea {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: 2px;
-    outline: none;
-    color: var(--text);
-    font-family: 'DM Mono', monospace;
-    font-size: 0.88rem;
-    line-height: 1.55;
-    padding: 10px 12px;
-    resize: none;
-    min-height: 44px;
-    max-height: 140px;
-    caret-color: var(--accent);
-    transition: border-color 0.15s;
+    flex: 1; background: var(--bg); border: 1px solid var(--border); border-radius: 2px;
+    outline: none; color: var(--text); font-family: 'DM Mono', monospace; font-size: 0.88rem;
+    line-height: 1.55; padding: 10px 12px; resize: none; min-height: 44px; max-height: 180px;
+    caret-color: var(--accent); transition: border-color 0.15s;
   }
   textarea:focus { border-color: rgba(232,213,163,0.4); }
   textarea::placeholder { color: var(--muted); opacity: 0.5; }
-
   .btn-send {
-    background: var(--accent);
-    color: #0e0e0f;
-    border: none;
-    width: 44px;
-    height: 44px;
-    flex-shrink: 0;
-    font-size: 1.2rem;
-    cursor: pointer;
-    border-radius: 2px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    transition: opacity 0.15s;
+    background: var(--accent); color: #0e0e0f; border: none; width: 44px; height: 44px;
+    flex-shrink: 0; font-size: 1.2rem; cursor: pointer; border-radius: 2px;
+    display: flex; align-items: center; justify-content: center; transition: opacity 0.15s;
   }
-  .btn-send:hover   { opacity: 0.85; }
+  .btn-send:hover { opacity: 0.85; }
   .btn-send:disabled { opacity: 0.35; cursor: not-allowed; }
 </style>
 </head>
 <body>
 
 <div class="header">
-  <div class="logo">Priorit</div>
-  <div class="tagline">Eisenhower · Agenda</div>
+  <div class="header-left">
+    <div class="logo">Priorit</div>
+    <div class="tagline">Eisenhower · Agenda</div>
+  </div>
+  <button class="btn-clear" id="btnClear" onclick="clearAll()">Tout effacer</button>
 </div>
 
 <div class="main" id="main">
@@ -372,53 +160,51 @@
     <button class="btn-dismiss" onclick="document.getElementById('installBanner').style.display='none'">✕</button>
   </div>
 
-  <div class="status" id="status">Saisissez vos tâches ci-dessous</div>
+  <div class="progress-wrap" id="progressWrap">
+    <div class="progress-header">
+      <span class="progress-label" id="progressLabel">Traitement...</span>
+      <span class="progress-pct" id="progressPct">0%</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="progressFill"></div></div>
+  </div>
+
+  <div class="status" id="status">Collez n'importe quelle liste ou saisissez librement</div>
   <div id="results"></div>
 </div>
 
 <div class="input-bar">
-  <div class="input-hint">Saisie libre de tâches</div>
+  <div class="input-hint" id="inputHint">Saisie libre ou liste en masse — l'app gère tout</div>
   <div class="input-row">
-    <textarea
-      id="taskInput"
-      placeholder="Ex : RDV dentiste urgent, payer loyer avant vendredi, idée voyage Japon..."
-      rows="2"
-    ></textarea>
+    <textarea id="taskInput"
+      placeholder="Saisie libre : RDV dentiste urgent, payer loyer...&#10;&#10;Ou collez une liste brute :&#10;Poser la faïence&#10;Acheter les plinthes&#10;Résilier MAE&#10;..."
+      rows="3"></textarea>
     <button class="btn-send" id="sendBtn" onclick="analyze()">→</button>
   </div>
 </div>
 
 <script>
-// ── PWA Install prompt ──
+// ── PWA ──
 let deferredPrompt = null;
 window.addEventListener('beforeinstallprompt', e => {
-  e.preventDefault();
-  deferredPrompt = e;
+  e.preventDefault(); deferredPrompt = e;
   document.getElementById('installBanner').style.display = 'flex';
 });
-
-document.getElementById('installBtn').addEventListener('click', async () => {
+document.getElementById('installBtn')?.addEventListener('click', async () => {
   if (!deferredPrompt) return;
-  deferredPrompt.prompt();
-  const { outcome } = await deferredPrompt.userChoice;
+  deferredPrompt.prompt(); await deferredPrompt.userChoice;
   deferredPrompt = null;
   document.getElementById('installBanner').style.display = 'none';
 });
+if ('serviceWorker' in navigator) navigator.serviceWorker.register('./sw.js').catch(() => {});
 
-window.addEventListener('appinstalled', () => {
-  document.getElementById('installBanner').style.display = 'none';
-});
+// ── State ──
+let allTasks = [];
 
-// ── Service Worker ──
-if ('serviceWorker' in navigator) {
-  navigator.serviceWorker.register('./sw.js').catch(() => {});
-}
-
-// ── Auto-resize textarea ──
+// ── Textarea auto-resize ──
 const textarea = document.getElementById('taskInput');
 textarea.addEventListener('input', () => {
   textarea.style.height = 'auto';
-  textarea.style.height = Math.min(textarea.scrollHeight, 140) + 'px';
+  textarea.style.height = Math.min(textarea.scrollHeight, 180) + 'px';
 });
 
 // ── Helpers ──
@@ -427,89 +213,114 @@ const resultsEl = document.getElementById('results');
 
 function setStatus(msg, type = '') {
   statusEl.className = 'status ' + type;
-  statusEl.innerHTML = type === 'loading'
-    ? `<span class="dot"></span>${msg}`
-    : msg;
+  statusEl.innerHTML = type === 'loading' ? `<span class="dot"></span>${msg}` : msg;
+}
+
+function setProgress(current, total) {
+  const wrap = document.getElementById('progressWrap');
+  const pct = Math.round((current / total) * 100);
+  wrap.classList.add('visible');
+  document.getElementById('progressLabel').textContent = `Lot ${current} / ${total}`;
+  document.getElementById('progressPct').textContent = pct + '%';
+  document.getElementById('progressFill').style.width = pct + '%';
+  if (current >= total) setTimeout(() => wrap.classList.remove('visible'), 1500);
+}
+
+function clearAll() {
+  allTasks = [];
+  resultsEl.innerHTML = '';
+  setStatus('Collez n\'importe quelle liste ou saisissez librement');
+  document.getElementById('btnClear').classList.remove('visible');
+}
+
+// ── Smart input parser ──
+// Détecte si c'est une liste (>3 lignes avec items courts) ou du texte libre
+function parseInput(text) {
+  const lines = text.split('\n').map(l => l.trim()).filter(l => l.length > 1);
+
+  // Remove duplicates (case-insensitive)
+  const seen = new Set();
+  const deduped = lines.filter(l => {
+    const key = l.toLowerCase().replace(/[^a-z0-9àâéèêëîïôùûüç]/g, '');
+    if (seen.has(key)) return false;
+    seen.add(key);
+    return true;
+  });
+
+  // Remove section headers (lines ending with nothing after them that look like titles)
+  const cleaned = deduped.filter(l => {
+    // Skip pure category headers (very short, no verb, no action word)
+    if (l.length < 3) return false;
+    // Skip lines that are just room/section names without action
+    const headerPatterns = /^(cuisine|entrée|salon|salle de bain|sdb|sde|wc|chambres?|bureau|dressing|cellier|jardin|terrasse|administratif|électricité|éclairage|extérieur)$/i;
+    if (headerPatterns.test(l)) return false;
+    return true;
+  });
+
+  const isBatch = cleaned.length > 3;
+  return { tasks: cleaned, isBatch };
 }
 
 // ── System prompt ──
-const SYSTEM_PROMPT = `Tu es un assistant d'organisation personnel. Tu analyses du texte libre en français et extrais des tâches que tu classes selon la matrice d'Eisenhower.
+const SYSTEM_PROMPT = `Tu es un assistant d'organisation personnelle. Tu reçois une liste de tâches (travaux, courses, administratif, etc.) et tu les classes selon la matrice d'Eisenhower.
 
 Règles de classification :
-- Q1 (Urgent + Important) : à faire immédiatement
-- Q2 (Important, pas urgent) : à planifier
-- Q3 (Urgent, pas important) : à traiter vite ou déléguer
-- Q4 (Ni urgent ni important) : à faire quand possible
+- Q1 (Urgent + Important) : délai immédiat, bloque d'autres tâches, ou administratif urgent (résiliations, paiements)
+- Q2 (Important, pas urgent) : travaux structurants, planification, projets
+- Q3 (Urgent, pas important) : petites courses, achats matériaux courants
+- Q4 (Ni urgent ni important) : déco, optimisation, idées futures
 
 Ordre d'importance des catégories :
 1. Finances / administratif
-2. Famille / proches
+2. Famille / proches  
 3. Santé / RDV médicaux
-4. Projets personnels
+4. Projets personnels (inclut travaux maison)
 5. Loisirs / voyages
-6. Courses / quotidien
+6. Courses / quotidien (inclut achats matériaux)
 
-L'urgence est déterminée par le contexte (mots comme "urgent", "demain", "avant vendredi", délais implicites, etc.).
+Réponds UNIQUEMENT en JSON valide, sans markdown :
+{"tasks":[{"name":"...","category":"...","quadrant":"Q1"|"Q2"|"Q3"|"Q4","date":"...","duration":"...","reason":"..."}]}`;
 
-Tu reçois aussi les événements déjà présents dans Google Calendar pour les 7 prochains jours. Tu dois proposer des créneaux horaires qui ne sont PAS déjà occupés. Si un créneau est pris, décale la tâche au prochain créneau libre.
-
-Réponds UNIQUEMENT en JSON valide, sans markdown, sans explication :
-{
-  "tasks": [
-    {
-      "name": "Nom court de la tâche",
-      "category": "une des 6 catégories",
-      "quadrant": "Q1"|"Q2"|"Q3"|"Q4",
-      "date": "Date ET heure précises suggérées (ex: Lundi 24 mars à 10h00)",
-      "duration": "Durée estimée (15 min, 1h, 2h...)",
-      "reason": "Justification courte (max 6 mots)",
-      "conflict": false
-    }
-  ]
-}`;
-
-// ── Fetch existing Google Calendar events ──
+// ── Fetch Calendar ──
 async function fetchCalendarEvents() {
   const today = new Date();
-  const in7days = new Date(today.getTime() + 7 * 24 * 60 * 60 * 1000);
-  const fmt = d => d.toISOString();
-
+  const in7days = new Date(today.getTime() + 7*24*60*60*1000);
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
         mcp_servers: [{ type: 'url', url: 'https://gcal.mcp.claude.com/mcp', name: 'gcal' }],
-        system: `Tu es un assistant qui lit Google Calendar. Réponds UNIQUEMENT en JSON valide sans markdown.`,
-        messages: [{
-          role: 'user',
-          content: `Liste tous mes événements Google Calendar entre le ${fmt(today)} et le ${fmt(in7days)}. 
-Réponds en JSON uniquement :
-{"events": [{"title": "...", "start": "...", "end": "...", "date": "..."}]}`
-        }]
+        system: 'Réponds UNIQUEMENT en JSON valide sans markdown.',
+        messages: [{ role: 'user', content: `Liste mes événements Google Calendar entre le ${today.toISOString()} et le ${in7days.toISOString()}. JSON: {"events":[{"title":"...","start":"...","end":"..."}]}` }]
       })
     });
-
     const data = await res.json();
-    // Extract text from all text blocks
-    const textBlocks = data.content?.filter(b => b.type === 'text').map(b => b.text).join('');
-    const toolResults = data.content?.filter(b => b.type === 'mcp_tool_result').map(b => b.content?.[0]?.text || '').join('\n');
-    const raw = (textBlocks + toolResults).replace(/```json|```/g, '').trim();
-
-    try {
-      const parsed = JSON.parse(raw);
-      return parsed.events || [];
-    } catch {
-      return [];
-    }
-  } catch {
-    return [];
-  }
+    const text = data.content?.filter(b => b.type==='text').map(b=>b.text).join('') || '';
+    const parsed = JSON.parse(text.replace(/```json|```/g,'').trim());
+    return parsed.events || [];
+  } catch { return []; }
 }
 
-// ── Analyze ──
+// ── Analyze one batch ──
+async function analyzeBatch(taskLines, calContext) {
+  const today = new Date().toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric'});
+  const content = taskLines.join('\n') + (calContext || '');
+  const res = await fetch('https://api.anthropic.com/v1/messages', {
+    method: 'POST', headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      model: 'claude-sonnet-4-20250514', max_tokens: 1000,
+      system: SYSTEM_PROMPT + `\n\nAujourd'hui : ${today}`,
+      messages: [{ role: 'user', content }]
+    })
+  });
+  const data = await res.json();
+  const raw = data.content?.[0]?.text || '';
+  const parsed = JSON.parse(raw.replace(/```json|```/g,'').trim());
+  return parsed.tasks || [];
+}
+
+// ── Main analyze ──
 async function analyze() {
   const text = textarea.value.trim();
   if (!text) return;
@@ -517,148 +328,144 @@ async function analyze() {
   const btn = document.getElementById('sendBtn');
   btn.disabled = true;
 
-  // Step 1: fetch calendar
+  // Parse & deduplicate input
+  const { tasks: taskLines, isBatch } = parseInput(text);
+
+  // Fetch calendar context
   setStatus('Lecture de votre agenda...', 'loading');
   const existingEvents = await fetchCalendarEvents();
+  const calContext = existingEvents.length > 0
+    ? '\n\nAgenda des 7 prochains jours (éviter les conflits) :\n' + existingEvents.map(e=>`- ${e.title} : ${e.start} → ${e.end}`).join('\n')
+    : '';
 
-  // Step 2: analyze tasks with calendar context
-  setStatus('Analyse et planification...', 'loading');
+  const BATCH_SIZE = 10;
+  let newTasks = [];
 
-  const calendarContext = existingEvents.length > 0
-    ? `\n\nÉvénements déjà dans ton agenda les 7 prochains jours :\n${existingEvents.map(e => `- ${e.title} : ${e.date || ''} ${e.start || ''} → ${e.end || ''}`).join('\n')}`
-    : '\n\nAgenda vide pour les 7 prochains jours.';
+  if (!isBatch) {
+    // Saisie libre : envoyer tel quel
+    setStatus('Analyse en cours...', 'loading');
+    try {
+      const tasks = await analyzeBatch([text], calContext);
+      newTasks = tasks;
+    } catch { setStatus('Erreur. Réessayez.', 'error'); btn.disabled = false; return; }
+  } else {
+    // Liste en masse : lots de 10, silencieux
+    const batches = [];
+    for (let i = 0; i < taskLines.length; i += BATCH_SIZE) batches.push(taskLines.slice(i, i + BATCH_SIZE));
 
-  try {
-    const today = new Date().toLocaleDateString('fr-FR', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
-    const response = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
-        system: SYSTEM_PROMPT + `\n\nAujourd'hui : ${today}`,
-        messages: [{ role: 'user', content: text + calendarContext }]
-      })
-    });
+    setStatus(`${taskLines.length} tâches détectées, traitement...`, 'loading');
 
-    const data = await response.json();
-    const raw = data.content?.[0]?.text || '';
-    const parsed = JSON.parse(raw.replace(/```json|```/g, '').trim());
-    const tasks = parsed.tasks || [];
-
-    renderResults(tasks, existingEvents.length);
-    setStatus(`${tasks.length} tâche${tasks.length > 1 ? 's' : ''} planifiée${tasks.length > 1 ? 's' : ''} · ${existingEvents.length} événement${existingEvents.length > 1 ? 's' : ''} existant${existingEvents.length > 1 ? 's' : ''} pris en compte`);
-    textarea.value = '';
-    textarea.style.height = 'auto';
-
-    setTimeout(() => document.getElementById('results').scrollIntoView({ behavior: 'smooth' }), 100);
-  } catch (e) {
-    setStatus('Erreur lors de l\'analyse. Réessayez.', 'error');
-  } finally {
-    btn.disabled = false;
+    for (let i = 0; i < batches.length; i++) {
+      setProgress(i + 1, batches.length);
+      try {
+        const tasks = await analyzeBatch(batches[i], i === 0 ? calContext : '');
+        newTasks = [...newTasks, ...tasks];
+        // Render progressively
+        allTasks = [...allTasks, ...tasks];
+        renderResults(allTasks);
+      } catch { /* skip failed batch silently */ }
+      if (i < batches.length - 1) await new Promise(r => setTimeout(r, 500));
+    }
   }
+
+  if (!isBatch) {
+    allTasks = [...allTasks, ...newTasks];
+    renderResults(allTasks);
+  }
+
+  const calInfo = existingEvents.length > 0 ? ` · ${existingEvents.length} événements agenda pris en compte` : '';
+  setStatus(`${newTasks.length} tâche${newTasks.length>1?'s':''} classée${newTasks.length>1?'s':''}${calInfo}`);
+  document.getElementById('btnClear').classList.add('visible');
+
+  textarea.value = '';
+  textarea.style.height = 'auto';
+  setTimeout(() => resultsEl.scrollIntoView({ behavior: 'smooth' }), 100);
+  btn.disabled = false;
 }
 
 // ── Render ──
-function renderResults(tasks, calCount = 0) {
+function renderResults(tasks) {
   const quadrants = {
-    Q1: { desc: 'Urgent · Important',       tasks: [] },
-    Q2: { desc: 'Important · À planifier',  tasks: [] },
+    Q1: { desc: 'Urgent · Important', tasks: [] },
+    Q2: { desc: 'Important · À planifier', tasks: [] },
     Q3: { desc: 'Urgent · Moins important', tasks: [] },
-    Q4: { desc: 'À faire plus tard',        tasks: [] }
+    Q4: { desc: 'À faire plus tard', tasks: [] }
   };
   tasks.forEach(t => { if (quadrants[t.quadrant]) quadrants[t.quadrant].tasks.push(t); });
 
   let html = '<div class="results">';
   Object.entries(quadrants).forEach(([key, q], qi) => {
     if (!q.tasks.length) return;
-    html += `
-      <div class="quadrant-block ${key.toLowerCase()}" style="animation-delay:${qi*0.07}s">
-        <div class="quadrant-header">
-          <span class="q-badge">${key}</span>
-          <span class="q-title">${q.desc}</span>
-        </div>`;
+    html += `<div class="quadrant-block ${key.toLowerCase()}" style="animation-delay:${qi*0.06}s">
+      <div class="quadrant-header">
+        <span class="q-badge">${key}</span>
+        <span class="q-title">${q.desc}</span>
+        <span class="q-count">${q.tasks.length}</span>
+      </div>`;
     q.tasks.forEach((task, i) => {
       const id = `t-${key}-${i}`;
-      const taskJson = JSON.stringify(task).replace(/"/g, '&quot;');
-      html += `
-        <div class="task-item">
-          <div class="task-info">
-            <div class="task-name">${task.name}</div>
-            <div class="task-meta">
-              <span class="meta-pill">${task.category}</span>
-              <span class="meta-pill">${task.duration || '?'}</span>
-              <span class="meta-pill">${task.reason}</span>
-            </div>
+      const tj = JSON.stringify(task).replace(/"/g, '&quot;');
+      html += `<div class="task-item">
+        <div class="task-info">
+          <div class="task-name">${task.name}</div>
+          <div class="task-meta">
+            <span class="meta-pill">${task.category}</span>
+            <span class="meta-pill">${task.duration||'?'}</span>
+            <span class="meta-pill">${task.reason}</span>
           </div>
-          <div class="task-right">
-            <div class="task-date">${task.date}</div>
-            <button class="btn-cal" id="${id}" onclick="addToCalendar(this, ${taskJson})">+ Agenda</button>
-          </div>
-        </div>`;
+        </div>
+        <div class="task-right">
+          <div class="task-date">${task.date}</div>
+          <button class="btn-cal" id="${id}" onclick="addToCalendar(this,${tj})">+ Agenda</button>
+        </div>
+      </div>`;
     });
     html += `</div>`;
   });
-  html += '</div>';
-  html += `
-    <div class="add-all-row">
-      <button class="btn-add-all" onclick="addAllToCalendar(${JSON.stringify(tasks).replace(/"/g, '&quot;')})">
-        Tout ajouter →
-      </button>
-    </div>`;
-
+  html += `</div>
+  <div class="add-all-row">
+    <button class="btn-add-all" id="btnAddAll" onclick="addAllToCalendar()">Tout ajouter à l'agenda →</button>
+  </div>`;
   resultsEl.innerHTML = html;
 }
 
-// ── Add to Calendar ──
+// ── Calendar ──
 async function addToCalendar(btn, task) {
-  btn.disabled = true;
-  btn.textContent = '...';
+  if (btn.classList.contains('added')) return;
+  btn.disabled = true; btn.textContent = '...';
   try {
     const res = await fetch('https://api.anthropic.com/v1/messages', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1000,
+        model: 'claude-sonnet-4-20250514', max_tokens: 1000,
         mcp_servers: [{ type: 'url', url: 'https://gcal.mcp.claude.com/mcp', name: 'gcal' }],
-        system: `Tu es un assistant qui crée des événements Google Calendar. Aujourd'hui : ${new Date().toLocaleDateString('fr-FR', {weekday:'long',year:'numeric',month:'long',day:'numeric'})}. Crée l'événement avec une date et heure réalistes selon la priorité.`,
-        messages: [{
-          role: 'user',
-          content: `Crée un événement Google Calendar :
-Nom : ${task.name}
-Catégorie : ${task.category}
-Priorité : ${task.quadrant}
-Date suggérée : ${task.date}
-Durée : ${task.duration}`
-        }]
+        system: `Tu crées des événements Google Calendar. Aujourd'hui : ${new Date().toLocaleDateString('fr-FR',{weekday:'long',year:'numeric',month:'long',day:'numeric'})}.`,
+        messages: [{ role: 'user', content: `Crée l'événement : "${task.name}" | Priorité: ${task.quadrant} | Date suggérée: ${task.date} | Durée: ${task.duration||'30 min'}` }]
       })
     });
     const data = await res.json();
-    const ok = data.content?.some(b => b.type === 'mcp_tool_result' || (b.type === 'text' && b.text.length > 0));
-    if (ok) { btn.textContent = '✓ Ajouté'; btn.classList.add('added'); }
+    const ok = data.content?.some(b => b.type==='mcp_tool_result' || (b.type==='text' && b.text.length>0));
+    if (ok) { btn.textContent = '✓'; btn.classList.add('added'); }
     else throw new Error();
-  } catch {
-    btn.textContent = 'Erreur';
-    btn.disabled = false;
-  }
+  } catch { btn.textContent = 'Erreur'; btn.disabled = false; }
 }
 
-async function addAllToCalendar(tasks) {
-  const btn = document.querySelector('.btn-add-all');
-  btn.disabled = true;
-  btn.textContent = 'Ajout...';
-  for (let i = 0; i < tasks.length; i++) {
-    const t = tasks[i];
-    const idx = (() => {
-      let c = 0;
-      for (let j = 0; j < i; j++) if (tasks[j].quadrant === t.quadrant) c++;
-      return c;
-    })();
-    const b = document.getElementById(`t-${t.quadrant}-${idx}`);
-    if (b && !b.classList.contains('added')) {
-      await addToCalendar(b, t);
-      await new Promise(r => setTimeout(r, 500));
+async function addAllToCalendar() {
+  const btn = document.getElementById('btnAddAll');
+  if (!btn) return;
+  btn.disabled = true; btn.textContent = 'Ajout en cours...';
+  const calBtns = [...document.querySelectorAll('.btn-cal:not(.added)')];
+  for (let i = 0; i < calBtns.length; i++) {
+    const b = calBtns[i];
+    const onclickStr = b.getAttribute('onclick') || '';
+    const match = onclickStr.match(/addToCalendar\(this,([\s\S]*)\)$/);
+    if (match) {
+      try {
+        const task = JSON.parse(match[1].replace(/&quot;/g, '"'));
+        await addToCalendar(b, task);
+        btn.textContent = `Ajout... ${i+1}/${calBtns.length}`;
+        await new Promise(r => setTimeout(r, 400));
+      } catch {}
     }
   }
   btn.textContent = '✓ Tous ajoutés';
